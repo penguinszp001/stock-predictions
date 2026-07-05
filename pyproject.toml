@@ -1,0 +1,10 @@
+[project]
+name = "stock-predictions"
+version = "0.1.0"
+description = "Local stock prediction data platform and ML playground."
+requires-python = ">=3.12,<3.13"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+pythonpath = ["python"]
+testpaths = ["tests"]

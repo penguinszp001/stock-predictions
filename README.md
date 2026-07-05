@@ -7,7 +7,7 @@ Personal stock prediction platform for practicing data engineering, analytics en
 This repository currently implements the first two architecture steps:
 
 1. **Git repository organization** for source code, docs, notebooks, database initialization, dbt models, tests, and Airflow assets.
-2. **Docker Compose local infrastructure** that starts PostgreSQL and Apache Airflow as a reproducible local mini-cloud.
+2. **Docker Compose local infrastructure** that starts PostgreSQL and Apache Airflow as a reproducible local mini-cloud using Python 3.12-targeted services.
 
 ## Repository layout
 
@@ -20,6 +20,10 @@ notebooks/           Jupyter exploration notebooks
 python/stock_platform/ Reusable Python package code
 tests/               Automated tests
 ```
+
+## Runtime target
+
+Use **Python 3.12** for local development. The Airflow services use the official `apache/airflow:3.2.2-python3.12` image, `pyproject.toml` declares `>=3.12,<3.13`, and the dependency list is selected for Python 3.12 on Ubuntu 24.04-compatible development machines.
 
 ## Quick start
 
@@ -35,7 +39,7 @@ tests/               Automated tests
    docker compose up
    ```
 
-3. Open Airflow at <http://localhost:8080> and sign in with `airflow` / `airflow`.
+3. Open the Airflow API server / UI at <http://localhost:8080> and sign in with `airflow` / `airflow`.
 
 PostgreSQL is exposed on `localhost:5432` by default. On first startup it creates the `raw`, `analytics`, and `metadata` schemas from `db/init/01_create_schemas.sql`.
 
