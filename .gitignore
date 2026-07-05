@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Stock prediction local runtime
+.env.*
+!.env.example
+postgres-data/
+airflow-logs/
+logs/
+.vscode/
+.idea/
