@@ -8,7 +8,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-stock_user}:${POSTGRES_PASSWORD:-stock_password}@postgres:5432/${POSTGRES_DB:-stock_predictions}
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_POSTGRES_USER:-airflow_user}:${AIRFLOW_POSTGRES_PASSWORD:-airflow_password}@airflow-postgres:5432/${AIRFLOW_POSTGRES_DB:-airflow_metadata}
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-change-me-for-local-dev-jwt-secret}
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-stock-predictions-local}
@@ -24,7 +24,7 @@ x-airflow-common: &airflow-common
     - ./airflow/plugins:/opt/airflow/plugins
     - ./python:/opt/airflow/python
   depends_on:
-    postgres:
+    airflow-postgres:
       condition: service_healthy
 
 services:
@@ -50,10 +50,56 @@ services:
       timeout: 5s
       retries: 5
 
+  airflow-postgres:
+    image: postgres:17-bookworm
+    container_name: stock-airflow-postgres
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_USER: ${AIRFLOW_POSTGRES_USER:-airflow_user}
+      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD:-airflow_password}
+      POSTGRES_DB: ${AIRFLOW_POSTGRES_DB:-airflow_metadata}
+    volumes:
+      - airflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  metabase-postgres:
+    image: postgres:17-bookworm
+    container_name: stock-metabase-postgres
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_USER: ${METABASE_POSTGRES_USER:-metabase_user}
+      POSTGRES_PASSWORD: ${METABASE_POSTGRES_PASSWORD:-metabase_password}
+      POSTGRES_DB: ${METABASE_POSTGRES_DB:-metabase_application_metadata}
+    volumes:
+      - metabase-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   airflow-init:
     <<: *airflow-common
     container_name: stock-airflow-init
-    command: version
+    user: "0:0"
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        mkdir -p /opt/airflow/logs/dag_processor_manager /opt/airflow/dags /opt/airflow/plugins
+        chown -R "${AIRFLOW_UID:-50000}:0" /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        chmod -R g+rwX /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        exec /entrypoint airflow version
 
   airflow-api-server:
     <<: *airflow-common
@@ -103,18 +149,18 @@ services:
     container_name: stock-metabase
     restart: unless-stopped
     depends_on:
-      postgres:
+      metabase-postgres:
         condition: service_healthy
     env_file:
       - path: .env
         required: false
     environment:
       MB_DB_TYPE: postgres
-      MB_DB_HOST: postgres
+      MB_DB_HOST: metabase-postgres
       MB_DB_PORT: 5432
-      MB_DB_DBNAME: ${METABASE_DB_NAME:-metabase_app}
-      MB_DB_USER: ${POSTGRES_USER:-stock_user}
-      MB_DB_PASS: ${POSTGRES_PASSWORD:-stock_password}
+      MB_DB_DBNAME: ${METABASE_POSTGRES_DB:-metabase_application_metadata}
+      MB_DB_USER: ${METABASE_POSTGRES_USER:-metabase_user}
+      MB_DB_PASS: ${METABASE_POSTGRES_PASSWORD:-metabase_password}
     ports:
       - "${METABASE_PORT:-3000}:3000"
 
@@ -134,3 +180,5 @@ services:
 
 volumes:
   postgres-data:
+  airflow-postgres-data:
+  metabase-postgres-data:
