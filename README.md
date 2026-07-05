@@ -7,7 +7,7 @@ Personal stock prediction platform for practicing data engineering, analytics en
 This repository currently implements the first two architecture steps:
 
 1. **Git repository organization** for source code, docs, notebooks, database initialization, dbt models, tests, and Airflow assets.
-2. **Docker Compose local infrastructure** that starts PostgreSQL and Apache Airflow as a reproducible local mini-cloud using Python 3.12-targeted services.
+2. **Docker Compose local infrastructure** that starts PostgreSQL, Apache Airflow, and Metabase as a reproducible local mini-cloud using Python 3.12-targeted services.
 
 ## Repository layout
 
@@ -41,6 +41,6 @@ Use **Python 3.12** for local development. The Airflow services use the official
 
 3. Open the Airflow API server / UI at <http://localhost:8080> and sign in with `airflow` / `airflow`.
 
-PostgreSQL is exposed on `localhost:5432` by default. On first startup it creates the `raw`, `analytics`, and `metadata` schemas from `db/init/01_create_schemas.sql`.
+PostgreSQL is exposed on `localhost:5432` by default. Metabase is exposed on <http://localhost:3000>. On first startup, Postgres creates the `raw`, `analytics`, and `metadata` schemas from `db/init/01_create_schemas.sql` and a separate `metabase_app` database for Metabase application metadata.
 
 See [docs/local-development.md](docs/local-development.md) for more details.

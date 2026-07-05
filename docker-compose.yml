@@ -98,6 +98,26 @@ services:
         condition: service_completed_successfully
     command: triggerer
 
+  metabase:
+    image: ${METABASE_IMAGE_NAME:-metabase/metabase:v0.62.3.x}
+    container_name: stock-metabase
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: postgres
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: ${METABASE_DB_NAME:-metabase_app}
+      MB_DB_USER: ${POSTGRES_USER:-stock_user}
+      MB_DB_PASS: ${POSTGRES_PASSWORD:-stock_password}
+    ports:
+      - "${METABASE_PORT:-3000}:3000"
+
   pgadmin:
     image: dpage/pgadmin4:9
     container_name: stock-pgadmin
