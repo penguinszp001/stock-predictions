@@ -1,0 +1,9 @@
+# Target runtime: Python 3.12 on Ubuntu 24.04-compatible local development.
+pandas>=2.2
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+requests>=2.32
+numpy>=2.0
+jupyter>=1.1
+scikit-learn>=1.5
+pytest>=8.3
