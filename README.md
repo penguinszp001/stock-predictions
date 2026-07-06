@@ -13,7 +13,7 @@ This repository currently implements the first two architecture steps:
 
 ```text
 airflow/             Airflow DAGs, plugins, config, and local logs
-db/init/             PostgreSQL initialization scripts
+db/init/             Stock PostgreSQL initialization scripts
 dbt/models/          Future dbt transformation models
 docs/                Project documentation
 notebooks/           Jupyter exploration notebooks
@@ -23,7 +23,7 @@ tests/               Automated tests
 
 ## Runtime target
 
-Use **Python 3.12** for local development. The Airflow services use the official `apache/airflow:3.2.2-python3.12` image, `pyproject.toml` declares `>=3.12,<3.13`, and the dependency list is selected for Python 3.12 on Ubuntu 24.04-compatible development machines.
+Use **Python 3.12** for local development. The Airflow services use the official `apache/airflow:3.2.2` image, `pyproject.toml` declares `>=3.12,<3.13`, and the dependency list is selected for Python 3.12 on Ubuntu 24.04-compatible development machines.
 
 ## Quick start
 
@@ -41,6 +41,12 @@ Use **Python 3.12** for local development. The Airflow services use the official
 
 3. Open the Airflow API server / UI at <http://localhost:8080> and sign in with `airflow` / `airflow`.
 
-PostgreSQL is exposed on `localhost:5432` by default. Metabase is exposed on <http://localhost:3000>. On first startup, Postgres creates the `raw`, `analytics`, and `metadata` schemas from `db/init/01_create_schemas.sql` and a separate `metabase_app` database for Metabase application metadata.
+PostgreSQL is exposed on `localhost:5432` by default. Metabase is exposed on <http://localhost:3000>. On first startup, the stock Postgres container creates only the `stock_predictions` project database with the `raw`, `analytics`, and `metadata` schemas from `db/init/01_create_schemas.sql`.
+
+The local stack uses three separate PostgreSQL containers and volumes:
+
+- `stock-postgres` / `postgres-data` for stock project data.
+- `stock-airflow-postgres` / `airflow-postgres-data` for Airflow metadata in `airflow_metadata`, with Redis and the Celery worker services retained from the official Airflow Compose example.
+- `stock-metabase-postgres` / `metabase-postgres-data` for Metabase application metadata in `metabase_application_metadata`.
 
 See [docs/local-development.md](docs/local-development.md) for more details.
