@@ -23,7 +23,7 @@ tests/               Automated tests
 
 ## Runtime target
 
-Use **Python 3.12** for local development. The Airflow services use the official `apache/airflow:3.2.2-python3.12` image, `pyproject.toml` declares `>=3.12,<3.13`, and the dependency list is selected for Python 3.12 on Ubuntu 24.04-compatible development machines.
+Use **Python 3.12** for local development. The Airflow services use the official `apache/airflow:3.2.2` image, `pyproject.toml` declares `>=3.12,<3.13`, and the dependency list is selected for Python 3.12 on Ubuntu 24.04-compatible development machines.
 
 ## Quick start
 
@@ -46,7 +46,7 @@ PostgreSQL is exposed on `localhost:5432` by default. Metabase is exposed on <ht
 The local stack uses three separate PostgreSQL containers and volumes:
 
 - `stock-postgres` / `postgres-data` for stock project data.
-- `stock-airflow-postgres` / `airflow-postgres-data` for Airflow metadata in `airflow_metadata`.
+- `stock-airflow-postgres` / `airflow-postgres-data` for Airflow metadata in `airflow_metadata`, with Redis and the Celery worker services retained from the official Airflow Compose example.
 - `stock-metabase-postgres` / `metabase-postgres-data` for Metabase application metadata in `metabase_application_metadata`.
 
 See [docs/local-development.md](docs/local-development.md) for more details.
